@@ -1,0 +1,7 @@
+{
+    "name": "com.rundotgames.unitybutler",
+    "displayName": "Unity Butler by Run Dot Games",
+    "version": "1.0.0",
+    "unity": "2020.3",
+    "description": "Publishing To Itch.IO from Unity"
+}
