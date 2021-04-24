@@ -1,6 +1,15 @@
 {
     "name": "com.rundotgames.unitybutler",
-    "displayName": "Unity Butler by Run Dot Games",
+    "displayName": "Unity Butler",
+    "author": {
+        "name": "Mark Mayer",
+        "email": "mdm373@gmail.com",
+        "url": "https://www.rundotgames.com"
+    },
+    "keywords": [
+        "itch.io",
+        "butler"
+    ],
     "version": "1.0.0",
     "unity": "2020.3",
     "description": "Publishing To Itch.IO from Unity"

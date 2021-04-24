@@ -14,6 +14,10 @@ namespace RDG.UnityButler {
     public bool postToSlack;
 
     public bool Equals(PackagePreferences other) {
+      if (other == null) {
+        return false;
+      }
+      
       return itchAPIKey == other.itchAPIKey &&
              itchGame == other.itchGame &&
              itchUser == other.itchUser &&
@@ -31,7 +35,6 @@ namespace RDG.UnityButler {
       };
     }
   }
-  
   
   internal class PackagePreferencesManager {
 
@@ -71,18 +74,14 @@ namespace RDG.UnityButler {
 
     private static PackagePreferences Deserialize() {
       var preferencesPath = MakePreferencesPath();
-      if (!File.Exists(preferencesPath)) {
-        return new PackagePreferences();
-      }
-      
-      return JsonUtility.FromJson<PackagePreferences>(File.ReadAllText(preferencesPath));
+      return !File.Exists(preferencesPath) ?
+        new PackagePreferences() :
+        JsonUtility.FromJson<PackagePreferences>(File.ReadAllText(preferencesPath));
     }
 
-    private static string MakePreferencesPath() {
-      return Path.Combine(new[]{
-          $"{Application.dataPath}", "RDG", "UnityButler", "preferences.json"
-        });
-    }
+    private static string MakePreferencesPath() => Path.Combine(new[]{
+      $"{Application.dataPath}", "RDG", "UnityButler", "preferences.json"
+    });
     
   }
 }

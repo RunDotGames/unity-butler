@@ -21,7 +21,6 @@ namespace RDG.UnityButler {
 
     public bool Publish(string gamePath, string gameName) {
       return shell.Run($"butler push \"{gamePath}\" {gameName}", true, MakeButlerInstallPath());
-      
     }
     
     public void Install() {
@@ -30,7 +29,7 @@ namespace RDG.UnityButler {
         throw new Exception("unable to locate unity butler package info");
       }
       
-      if (!shell.Run("install-unity-butler.bat", true, Path.Combine(new[]{$"{info.resolvedPath}", "Editor", "Shell"}))) {
+      if (!shell.Run("install-unity-butler.bat", true, MakePackagePath(info))) {
         throw new Exception("failed to install unity butler");
       }
       
@@ -44,12 +43,14 @@ namespace RDG.UnityButler {
         Debug.LogWarning($"Unable to find butler in {installPath}");
       }
     }
+
+    private static string MakePackagePath(PackageInfo info) => Path.Combine(new[]{
+      $"{info.resolvedPath}", "Editor", "Shell"
+    });
+    private static string MakeButlerInstallPath() => Path.Combine(new[]{
+      $"{Application.dataPath}", "RDG", "UnityButler", "bin"
+    });
     
-    private static string MakeButlerInstallPath() {
-      return Path.Combine(new[]{
-        $"{Application.dataPath}", "RDG", "UnityButler", "bin"
-      });
-    }
     
   }
 }

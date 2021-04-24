@@ -19,7 +19,7 @@ namespace RDG.UnityButler {
 
     private bool showHelp;
     
-    [MenuItem("Window/Run Dot Games/Unity Butler")]
+    [MenuItem("Window/Unity Butler")]
     public static void Init() {
       var window = (PublishWindow)GetWindow(typeof(PublishWindow), false, "Publish");
       window.Show();
