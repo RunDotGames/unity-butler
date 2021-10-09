@@ -143,7 +143,7 @@ namespace RDG.UnityButler {
       }
 
       Debug.Log("Posting to slack...");
-      PostToSlack(":tada: New Browser Playable Build Published").ContinueWith((success) => {
+      PostToSlack($":tada: New Browser Playable Build Published: https://{preferences.itchUser}.itch.io/{preferences.itchGame}").ContinueWith((success) => {
         if (!success.Result) {
           Debug.LogError("Failed Posting To Slack");
           return;
