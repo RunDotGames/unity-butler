@@ -11,7 +11,9 @@ namespace RDG.UnityButler {
     public string itchGame;
     public string itchUser;
     public string slackWebhook;
+    public string discordWebhook;
     public bool postToSlack;
+    public bool postToDiscord;
 
     public bool Equals(PackagePreferences other) {
       if (other == null) {
@@ -22,7 +24,9 @@ namespace RDG.UnityButler {
              itchGame == other.itchGame &&
              itchUser == other.itchUser &&
              slackWebhook == other.slackWebhook &&
-             postToSlack == other.postToSlack;
+             postToSlack == other.postToSlack &&
+             postToDiscord == other.postToDiscord &&
+             discordWebhook == other.discordWebhook;
     }
     
     public object Clone() {
@@ -31,7 +35,9 @@ namespace RDG.UnityButler {
         itchUser = itchUser,
         itchAPIKey = itchAPIKey,
         slackWebhook = slackWebhook,
-        postToSlack = postToSlack
+        postToSlack = postToSlack,
+        discordWebhook = discordWebhook,
+        postToDiscord =  postToDiscord
       };
     }
   }

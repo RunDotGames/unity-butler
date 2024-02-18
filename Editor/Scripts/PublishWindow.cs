@@ -45,6 +45,8 @@ namespace RDG.UnityButler {
       EditorGUILayout.Separator();
       DrawSlackSettings();
       EditorGUILayout.Separator();
+      DrawDiscordSettings();
+      EditorGUILayout.Separator();
       GUI.enabled = butler.IsInstalled;
       if (GUILayout.Button("Publish",  GUILayout.ExpandWidth(false))) {
         Publish();
@@ -75,8 +77,16 @@ namespace RDG.UnityButler {
     private void DrawSlackSettings() {
       EditorGUILayout.LabelField("Slack Settings");
       EditorGUILayout.BeginVertical(GUI.skin.box);
-      preferences.slackWebhook = EditorGUILayout.TextField("Slack Webhook", preferences.slackWebhook);
-      preferences.postToSlack = EditorGUILayout.Toggle("Post To Slack", preferences.postToSlack);
+      preferences.slackWebhook = EditorGUILayout.TextField("Webhook", preferences.slackWebhook);
+      preferences.postToSlack = EditorGUILayout.Toggle("Enabled", preferences.postToSlack);
+      preferences = preferencesManager.Update(preferences);
+      EditorGUILayout.EndVertical();
+    }
+    private void DrawDiscordSettings() {
+      EditorGUILayout.LabelField("Discord Settings");
+      EditorGUILayout.BeginVertical(GUI.skin.box);
+      preferences.discordWebhook = EditorGUILayout.TextField("Webhook", preferences.discordWebhook);
+      preferences.postToDiscord = EditorGUILayout.Toggle("Enabled", preferences.postToDiscord);
       preferences = preferencesManager.Update(preferences);
       EditorGUILayout.EndVertical();
     }
@@ -114,13 +124,17 @@ namespace RDG.UnityButler {
     }
 
     
-    private void Publish() {
+    private async void Publish() {
       if (string.IsNullOrEmpty(preferences.itchAPIKey)) {
         throw new Exception("Butler API Key Required");
       }
 
       if (string.IsNullOrEmpty(preferences.slackWebhook) && preferences.postToSlack) {
         throw new Exception("Webhook required when posting to slack");
+      }
+      
+      if (string.IsNullOrEmpty(preferences.discordWebhook) && preferences.postToDiscord) {
+        throw new Exception("Webhook required when posting to discord");
       }
       
       Debug.Log("Building WebGL...");
@@ -136,21 +150,41 @@ namespace RDG.UnityButler {
       if (!uploadResult) {
         throw new Exception("failed to upload to itch.io");
       }
+      await HandleSlackPost();
+      await HandleDiscordPost();
+      Debug.Log("Done.");
+    }
 
+    private async Task<bool> HandleSlackPost() {
       if (!preferences.postToSlack) {
-        Debug.Log("Done.");
-        return;
+        return true;
       }
 
       Debug.Log("Posting to slack...");
-      PostToSlack($":tada: New Browser Playable Build Published: https://{preferences.itchUser}.itch.io/{preferences.itchGame}").ContinueWith((success) => {
-        if (!success.Result) {
-          Debug.LogError("Failed Posting To Slack");
-          return;
-        }
+      await PostToSlack($":tada: New Browser Playable Build Published: https://{preferences.itchUser}.itch.io/{preferences.itchGame}")
+        .ContinueWith(
+          (success) => {
+            if (!success.Result) {
+              Debug.LogError("Failed Posting To Slack");
+            }
+          });
+      return true;
+    }
+    
+    private async Task<bool> HandleDiscordPost() {
+      if (!preferences.postToDiscord) {
+        return true;
+      }
 
-        Debug.Log("Done.");
-      });
+      Debug.Log("Posting to discord...");
+      await PostToDiscord($":tada: New Browser Playable Build Published: https://{preferences.itchUser}.itch.io/{preferences.itchGame}")
+        .ContinueWith(
+          (success) => {
+            if (!success.Result) {
+              Debug.LogError("Failed Posting To Discord");
+            }
+          });
+      return true;
     }
 
 
@@ -160,13 +194,18 @@ namespace RDG.UnityButler {
         .Select((scene) => scene.path).ToArray();
     }
 
-    
-
     private async Task<bool> PostToSlack(string message) {
       var myJson = "{\"text\":\"" + message + "\"}";
       var client = new HttpClient();
       var response = await client.PostAsync(preferences.slackWebhook, new StringContent(myJson, Encoding.UTF8, "application/json"));
       return response.StatusCode == HttpStatusCode.OK;
+    }
+    
+    private async Task<bool> PostToDiscord(string message) {
+      var myJson = "{\"content\":\"" + message + "\"}";
+      var client = new HttpClient();
+      var response = await client.PostAsync(preferences.discordWebhook, new StringContent(myJson, Encoding.UTF8, "application/json"));
+      return response.StatusCode == HttpStatusCode.NoContent;
     }
     
     private static string MakeTempBuildPath() {
